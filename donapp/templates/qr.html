@@ -1,0 +1,39 @@
+<script>
+    var res;
+     function status_change() {
+         res = this;
+        if (this.readyState === 4) {
+            if (this.status !== 200) {
+                alert("ERROR! "+this.status)
+                return
+            }
+            var status = JSON.parse(this.response);
+            if (status["status"] === "READY") {
+                alert("Time to move on...")
+                return
+            }
+            if (status["status"] === "REFRESH") {
+                document.getElementById("qr").src = "data:image/png;base64, "+status["qr"];
+            }
+            setTimeout(check_status, 1000)
+        }
+    }
+    function check_status() {
+        var id = window.location.pathname.replace(/.*\//, "")
+        var url = "/qr_status/"+id;
+        var req = new XMLHttpRequest()
+        req.onreadystatechange = status_change;
+        req.open("GET", "/qr_status/"+id);
+        req.send();
+    }
+check_status()
+
+
+</script>
+Thanks for your willingness to donate!
+
+Please scan the QR code below:
+
+<img id="qr" src="data:image/png;base64, {{qr}}" />
+
+
