@@ -1,1 +1,2 @@
-whatsappstract>=0.0.3
+whatsappstract>=0.0.4
+flask

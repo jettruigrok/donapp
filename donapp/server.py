@@ -53,7 +53,6 @@ def download_file(id):
     with s.lock:
         assert s.status == "DONE"
         result = json.dumps(s.links)
-        print(s.links)
     return Response(result, mimetype='application/json',
                     headers={'Content-Disposition':'attachment;filename=whatsapp.json'})
 
