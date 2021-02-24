@@ -1,7 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
 <script>
     var res;
      function status_change() {
-         res = this;
+        res = this;
         if (this.readyState === 4) {
             if (this.status !== 200) {
                 alert("ERROR! "+this.status)
@@ -9,7 +12,9 @@
             }
             var status = JSON.parse(this.response);
             if (status["status"] === "READY") {
-                alert("Time to move on...")
+                var id = window.location.pathname.replace(/.*\//, "")
+                var url = "/prepare/" + id;
+                window.location.href = url;
                 return
             }
             if (status["status"] === "REFRESH") {
@@ -20,7 +25,6 @@
     }
     function check_status() {
         var id = window.location.pathname.replace(/.*\//, "")
-        var url = "/qr_status/"+id;
         var req = new XMLHttpRequest()
         req.onreadystatechange = status_change;
         req.open("GET", "/qr_status/"+id);
@@ -30,10 +34,11 @@ check_status()
 
 
 </script>
-Thanks for your willingness to donate!
+<p>Thanks for your willingness to donate!</p>
 
-Please scan the QR code below:
+<p>Please scan the QR code below:</p>
 
-<img id="qr" src="data:image/png;base64, {{qr}}" />
+<img style="width:250px; height:250px" id="qr" src="data:image/png;base64, {{qr}}" />
 
 
+{% endblock %}
