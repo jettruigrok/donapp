@@ -1,5 +1,7 @@
 import logging
+import time
 import threading
+
 from subprocess import TimeoutExpired
 from threading import Thread
 from typing import Mapping, Tuple, Optional
@@ -11,7 +13,8 @@ from whatsappstract.whatsapp import Whatsapp
 class WhatsappSession:
     """Wrapper around the Whatsapp class to remember state and do background scraping"""
     def __init__(self, n_chats=2):
-        self.w = Whatsapp()
+        self.started_time = time.time()
+        self.w = Whatsapp(screenshot_folder="/tmp")
         self._last_qr: str = None
         self.links = None
         self.lock = threading.Lock()
@@ -65,8 +68,12 @@ class WhatsappSession:
                 self.status = "DONE"
                 self._message = f"Done, found {len(self.links)} in total"
                 self._progress = 100
+        finally:
+            self.w.quit_browser()
+            self.w = None
 
     def _do_scrape(self):
+        time.sleep(3)
         for i, (name, chat) in enumerate(self.w.get_all_chats()):
             if i >= self.n_chats:
                 break
@@ -96,6 +103,7 @@ class WhatsappSession:
 REGISTRY: Mapping[str, WhatsappSession] = {}
 
 def start_session(id: str) -> WhatsappSession:
+    prune_sessions()
     global REGISTRY
     assert id not in REGISTRY
     REGISTRY[id] = WhatsappSession()
@@ -105,3 +113,20 @@ def get_session(id: str) -> WhatsappSession:
     global REGISTRY
     assert id in REGISTRY
     return REGISTRY[id]
+
+def prune_sessions():
+    global REGISTRY
+    now = time.time()
+    n = len(REGISTRY)
+    for id, session in REGISTRY.items():
+        duration = now - session.started_time
+        if duration > 60*30:
+            logging.info(f"Sesssion {id} was started {duration} seconds ago, pruning")
+            if session.w is not None:
+                try:
+                    session.w.quit_browser()
+                except:
+                    logging.exception(f"Error on quitting browser in session {id}")
+            del REGISTRY[id]
+    logging.info(f"Pruning done, {len(REGISTRY)} sessions left out of {n}")
+    

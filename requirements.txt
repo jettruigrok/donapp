@@ -1,2 +1,2 @@
-whatsappstract>=0.0.4
+whatsappstract>=0.0.5
 flask
