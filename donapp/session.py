@@ -74,10 +74,10 @@ class WhatsappSession:
 
     def _do_scrape(self):
         time.sleep(3)
-        for i, (name, chat) in enumerate(self.w.get_all_chats()):
+        for i, chat in enumerate(self.w.get_all_chats()):
             if i >= self.n_chats:
                 break
-            msg = f"Scraping contact {i + 1}/{self.n_chats}: {name} [{len(self.links)} links found so far]"
+            msg = f"Scraping contact {i + 1}/{self.n_chats}: {chat.text} [{len(self.links)} links found so far]"
             logging.info(msg)
             with self.lock:
                 self._progress = round(i * 100 / self.n_chats)
